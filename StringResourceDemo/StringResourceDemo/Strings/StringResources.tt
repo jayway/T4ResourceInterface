@@ -1,0 +1,38 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="System.Xml.Linq" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ output extension=".cs" #>
+<#
+var resourceFile = XDocument.Load(Host.ResolvePath(@".\en-US\Resources.resw"));
+#>
+namespace StringResourceDemo.Strings
+{
+    using Windows.ApplicationModel.Resources;
+
+    public class StringResources : IStringResources
+    {
+<#
+var dataNodes = resourceFile.Elements().Elements(XName.Get("data")).ToList();
+dataNodes.ForEach(node =>
+{
+    var key = node.Attribute(XName.Get("name")).Value;
+    if (!key.Contains("."))
+        {
+#>
+        public string <# Write(key); #> { get { return GetString("<# Write(key); #>"); } }
+<#
+        }
+});
+#>
+
+        private string GetString(string key)
+        {
+            return ResourceLoader.GetForCurrentView().GetString(key);
+        }
+    }
+}
